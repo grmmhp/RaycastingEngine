@@ -1,4 +1,4 @@
-require"scripts/Map"
+require"Map"
 
 World = {}
 World.mt = {}
