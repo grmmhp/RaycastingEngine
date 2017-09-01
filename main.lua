@@ -1,11 +1,11 @@
-require"scripts/World"
+require"data.scripts.World"
 
 --Global variables for easy and fast typing--------------------------------------------------------------------
 lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesystem, love.window, love.timer
 ---------------------------------------------------------------------------------------------------------------
 
 function love.load()
-  local world=World()
+  world=World()
 end
 
 function love.update(dt)

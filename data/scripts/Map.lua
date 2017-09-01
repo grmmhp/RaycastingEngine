@@ -1,4 +1,4 @@
-require"Tile"
+require"data.scripts.Tile"
 
 Map = {}
 Map.mt={
@@ -31,7 +31,7 @@ setmetatable(Map,{
   end
 })
 
-function Map:drawMiniMap(self, x, y)
+function Map:draw(self, x, y)
   for ny=1,#self.walls do
     for nx=1,#self.walls[1] do
       local px = x+MINI_MAP_TILE_SIZE*(nx-1)+1
@@ -42,7 +42,7 @@ function Map:drawMiniMap(self, x, y)
       else
         lg.setColor(0,0,0)
       end
-      
+
       lg.rectangle("fill", px, py, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE)
     end
   end
