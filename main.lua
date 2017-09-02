@@ -16,3 +16,8 @@ end
 function love.draw()
   world:drawMiniMap(0, 0)
 end
+
+
+-- 23:29
+-- 01/09/2017
+-- HP7 <3
