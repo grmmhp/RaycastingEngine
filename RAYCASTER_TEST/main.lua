@@ -53,6 +53,7 @@ end
 function love.draw()
   drawMiniMap()
 
+  lg.setColor(255, 255, 0)
   lg.print(math.deg(player.a), 10, 10)
 end
 
@@ -83,6 +84,8 @@ function input()
   if lk.isDown("left") then
     player.a=player.a-player.av
   end
+
+  player.a=player.a%math.rad(360)
 end
 
 
@@ -94,11 +97,13 @@ function render()
   -- screen width
   local SW=lg.getWidth()
 
-  for angle=0, SW, FOV/(SW-1) do
-    print(angle+player.a)
-    traceRay(angle, map)
+  for angle=0, SW, player.FOV/(SW-1) do
+    print(angle+player.a-player.FOV/2)
+    distance = traceRay(angle, map)
   end
 end
+
+
 
 function traceRay(angle, world)
   local Xa, Xy
@@ -110,8 +115,10 @@ function traceRay(angle, world)
     Ya=BLOCK_SIZE
   end
 
-
+  return Ya
 end
+
+
 
 function isFacingUp(angle)
   if math.deg(angle)>0 and math.deg(angle)<180 then
@@ -161,6 +168,9 @@ function drawMiniMap(x, y)
   Px,Py=Px/BLOCK_SIZE*MINI_MAP_TILE_SIZE+x,Py/BLOCK_SIZE*MINI_MAP_TILE_SIZE+y
   lg.line(Px,Py,Px+LINE_SIZE*math.cos(player.a),Py+LINE_SIZE*math.sin(player.a))
 
+
+  lg.setColor(0,0,255)
   local angle_left, angle_right = player.a-player.FOV/2, player.a+player.FOV/2
-  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_left),Py+LINE_SIZE*math.sin(angle_right))
+  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_left),Py+LINE_SIZE*math.sin(angle_left))
+  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_right),Py+LINE_SIZE*math.sin(angle_right))
 end
