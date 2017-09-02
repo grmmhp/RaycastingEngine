@@ -6,13 +6,13 @@ setmetatable(World, {__call = function(t,map,entities) return World._new(t, map,
 
 function World._new(t, map, entities)
   local o = {}
-  o.map = map
+  o.map = map or Map()
   o.entities = entities or {}
   return setmetatable(o, World_mt)
 end
 
-function World:drawMiniMap(self)
-  self.map:draw()
+function World:drawMiniMap(x, y)
+  self.map:draw(x, y)
 end
 
 return World

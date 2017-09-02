@@ -5,8 +5,8 @@ lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesys
 ---------------------------------------------------------------------------------------------------------------
 
 function love.load()
-  world  = World(1, 2, 3)
-  world2 = World(4, 5, 6)
+  world  = World()
+  world2 = World()
 end
 
 function love.update(dt)
@@ -14,5 +14,5 @@ function love.update(dt)
 end
 
 function love.draw()
-  --world.map:drawMiniMap()
+  world:drawMiniMap(0, 0)
 end
