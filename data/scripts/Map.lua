@@ -5,7 +5,7 @@ Map.mt={__index=Map,}
 
 -- constants
 local DEFAULT_MAP_SIZE=30
-local MINI_MAP_TILE_SIZE=15
+local MINI_MAP_TILE_SIZE=20
 
 setmetatable(Map,{
   __call=function(t,width,height)
