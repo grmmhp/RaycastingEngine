@@ -3,7 +3,6 @@ lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesys
 ---------------------------------------------------------------------------------------------------------------
 
 -- global variables
-FOV=60
 MINI_MAP_TILE_SIZE=20
 
 BLOCK_SIZE=64
@@ -17,6 +16,7 @@ player={
   a=0,
   v=2.5,
   av=.05,
+  FOV=math.rad(60),
 }
 
 map={
@@ -95,12 +95,29 @@ function render()
   local SW=lg.getWidth()
 
   for angle=0, SW, FOV/(SW-1) do
-    print(angle)
+    print(angle+player.a)
     traceRay(angle, map)
   end
 end
 
 function traceRay(angle, world)
+  local Xa, Xy
+  local Ax, Ay
+
+  if isFacingUp(angle) then
+    Ya=-BLOCK_SIZE
+  else
+    Ya=BLOCK_SIZE
+  end
+
+
+end
+
+function isFacingUp(angle)
+  if math.deg(angle)>0 and math.deg(angle)<180 then
+    return false
+  end
+  return true
 end
 
 -----------------------
@@ -108,7 +125,9 @@ end
 
 
 
+function handleCollision()
 
+end
 
 function drawMiniMap(x, y)
   x=x or 0
@@ -141,4 +160,7 @@ function drawMiniMap(x, y)
   lg.setColor(0,255,0)
   Px,Py=Px/BLOCK_SIZE*MINI_MAP_TILE_SIZE+x,Py/BLOCK_SIZE*MINI_MAP_TILE_SIZE+y
   lg.line(Px,Py,Px+LINE_SIZE*math.cos(player.a),Py+LINE_SIZE*math.sin(player.a))
+
+  local angle_left, angle_right = player.a-player.FOV/2, player.a+player.FOV/2
+  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_left),Py+LINE_SIZE*math.sin(angle_right))
 end
