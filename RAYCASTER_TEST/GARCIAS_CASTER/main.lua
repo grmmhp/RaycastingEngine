@@ -21,8 +21,8 @@ local world = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 				}
-
-local px, py, pr = 218, 218, 0
+                      --    px    py   pr  pv   prv
+local px, py, pr, pv, prv = 218,  218,  0,  2,  2
 local FOV = 60
 local w, h = 320, 200
 local eachangle = w/FOV
@@ -44,15 +44,15 @@ function drawMap(map)
     end
   end
 end
-	
+
 
 local function castray(angle)
 
   local Ay, Ax, By, Bx, Ya, Xa, Xb, Yb, ALPHA
-  
+
   ALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   --print(ALPHA)
-  
+
   -- Intersecção Horizontal ----------------------------------------
   if angle < 0 and angle > -180 or angle > 180 and angle < 360 then
     dir = "UP"
@@ -65,7 +65,7 @@ local function castray(angle)
   end
   Ax = px + (py-Ay)/math.tan(ALPHA)
   Xa = 64/math.tan(ALPHA)
-  
+
   while world[math.floor(Ay/64)][math.floor(Ax/64)] == 0 do
     Ax = Ax + Xa
     Ay = Ay + Ya
@@ -78,7 +78,7 @@ local function castray(angle)
     end
   end
   -- Fim Intersecção Horizontal ----------------------------------------
-  
+
   -- Intersecção Vertical ----------------------------------------
   --[[if angle < 90 and angle > -90 or angle > 270 or angle < -270 then
     dir2 = "RIGHT"
@@ -103,30 +103,42 @@ local function castray(angle)
       break
     end
   end]]
-  
-  -- Fim Intersecção Vertical ----------------------------------------
-  
 
-  
+  -- Fim Intersecção Vertical ----------------------------------------
+
+
+
   love.graphics.setColor(255, 0, 0)
   --love.graphics.circle('fill', Xt, Yt, 10)
   love.graphics.setColor(255, 255, 255)
 end
 
 function love.load()
-  
+
 end
 
 function love.update(dt)
   if love.keyboard.isDown('w') then
-    px = px + math.cos(math.rad(pr))
-    py = py + math.sin(math.rad(pr))
+    px = px + math.cos(math.rad(pr))*pv
+    py = py + math.sin(math.rad(pr))*pv
   end
   if love.keyboard.isDown('a') then
-    pr = pr + 1
+    px = px - math.cos(math.rad(pr)+math.rad(90))*pv
+    py = py - math.sin(math.rad(pr)+math.rad(90))*pv
+  end
+  if love.keyboard.isDown('s') then
+    px = px - math.cos(math.rad(pr))*pv
+    py = py - math.sin(math.rad(pr))*pv
   end
   if love.keyboard.isDown('d') then
-    pr = pr - 1
+    px = px - math.cos(math.rad(pr)-math.rad(90))*pv
+    py = py - math.sin(math.rad(pr)-math.rad(90))*pv
+  end
+  if love.keyboard.isDown('left') then
+    pr = pr - prv
+  end
+  if love.keyboard.isDown('right') then
+    pr = pr + prv
   end
   if pr >= 360 or pr <= -360 then
     pr = 0

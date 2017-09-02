@@ -52,6 +52,8 @@ end
 
 function love.draw()
   drawMiniMap()
+
+  lg.print(math.deg(player.a), 10, 10)
 end
 
 
