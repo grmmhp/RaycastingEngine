@@ -55,7 +55,7 @@ function love.draw()
   lg.setColor(255, 0, 255)
   lg.print(math.deg(player.a).."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
-  --[[if isFacingUp(player.a) then
+--[[if isFacingUp(player.a) then
     Ya=-BLOCK_SIZE
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
@@ -63,11 +63,10 @@ function love.draw()
     Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
   end
   Xa=BLOCK_SIZE/math.tan(-player.a)
-  Ax = player.x + (player.y-Ay)/-math.tan(player.a)
+  Ax = player.x + (player.y-Ay)/-math.tan(player.a)]]
 
 
-  lg.print(Ax .."\n".. Ay, 10, 40)
-  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)]]
+
   render()
 end
 
@@ -130,22 +129,12 @@ function traceRay(angle, world)
     Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
   end
 
-
-  -- tan a = 64/Xa
-  -- Xa*tan a = 64
-  -- Xa = 64/tan a
-
-  --[[C.x=A.x+Xa = 115+36 = 151;
-   C.y=A.y+Ya = 191-64 = 127;]]
-
   Xa=BLOCK_SIZE/math.tan(-angle)
-  Ax = player.x+(player.y-Ay)/math.tan(angle)
+  Ax = player.x + (player.y-Ay)/-math.tan(angle)
 
-  for n=1,10 do
-    lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,.5)
-    Ax=Ax+Xa
-    Ay=Ay+Ya
-  end
+  lg.setColor(255, 0, 255)
+  lg.print(Ax .."\n".. Ay, 10, 40)
+  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
 
   return Ya
 end
