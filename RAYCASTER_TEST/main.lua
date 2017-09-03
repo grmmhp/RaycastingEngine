@@ -53,7 +53,7 @@ function love.draw()
   drawMiniMap()
 
   lg.setColor(255, 0, 255)
-  lg.print(math.deg(player.a).."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
+  lg.print(math.deg(player.a+player.FOV/2) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
 --[[if isFacingUp(player.a) then
     Ya=-BLOCK_SIZE
@@ -68,6 +68,9 @@ function love.draw()
 
 
   render()
+  --[[traceRay(player.a-player.FOV/2)
+  traceRay(player.a+player.FOV/2)
+  traceRay(player.a)]]
 end
 
 --
@@ -118,6 +121,8 @@ end
 
 
 function traceRay(angle, world)
+  angle=angle%math.rad(360)
+
   local Xa, Ya
   local Ax, Ay
 
@@ -130,11 +135,21 @@ function traceRay(angle, world)
   end
 
   Xa=BLOCK_SIZE/math.tan(-angle)
-  Ax = player.x + (player.y-Ay)/-math.tan(angle)
+  Ax = player.x + (player.y-Ay)/math.tan(-angle)
 
   lg.setColor(255, 0, 255)
   lg.print(Ax .."\n".. Ay, 10, 40)
   lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+
+  for n=1,10 do
+    Ay=Ay+Ya
+    if isFacingUp(angle) then
+      Ax=Ax+Xa
+    else
+      Ax=Ax-Xa
+    end
+    lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  end
 
   return Ya
 end
@@ -147,7 +162,12 @@ function isFacingUp(angle)
   end
   return true
 end
-
+function isFacingRight(angle)
+  if math.deg(angle)<90 and math.deg(angle)>270 then
+    return true
+  end
+  return false
+end
 -----------------------
 
 
