@@ -45,12 +45,12 @@ function drawMap(map)
   end
 end
 
-function get_distance(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
+function get_distance(px, x, alpha) return (px-x)/math.cos(alpha) end
 
 
 local function castray(angle)
 
-  local Ay, Ax, By, Bx, Ya, Xa, Xb, Yb, ALPHA, wALPHA
+  local Ay, Ax, By, Bx, Ya, Xa, Xb, Yb, ALPHA, hALPHA, vALPHA
 
   --print(ALPHA)
   ALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
@@ -59,15 +59,15 @@ local function castray(angle)
     dir = "UP"
     Ay = math.floor(py/64)*64-1
     Ya = -64
-    wALPHA = -math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
+    hALPHA = -math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   else
     dir = "DOWN"
     Ay = math.floor(py/64)*64+64
     Ya = 64
-    wALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
+    hALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   end
-  Ax = px + (py-Ay)/math.tan(wALPHA)
-  Xa = 64/math.tan(wALPHA)
+  Ax = px + (py-Ay)/math.tan(hALPHA)
+  Xa = 64/math.tan(hALPHA)
 
   while world[math.floor(Ay/64)][math.floor(Ax/64)] == 0 do
     Ax = Ax + Xa
@@ -87,15 +87,15 @@ local function castray(angle)
     dir2 = "RIGHT"
     Bx = math.floor(px/64)*64+64
     Xb = 64
-    wALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
+    vALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   else
     dir2 = "LEFT"
     Bx = math.floor(px/64)*64
     Xb = -64
-    wALPHA = -math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
+    vALPHA = -math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   end
-  By = py + (px-Bx)*math.tan(wALPHA)
-  Yb = 64*math.tan(wALPHA)
+  By = py + (px-Bx)*math.tan(vALPHA)
+  Yb = 64*math.tan(vALPHA)
   --print('Bx', Bx, 'By', By)
   if By < #world[1]*64 and By < #world*64 and Bx > 64 and By > 64 then
     while world[math.floor(By/64)][math.floor(Bx/64)] == 0 do
@@ -116,16 +116,18 @@ local function castray(angle)
 
   local DH, DV, Xt, Yt
   
-  DH = get_distance(px, py, Ax, Ay)
-  DV = get_distance(px, py, Bx, By)
+  DH = get_distance(px, Ax, hALPHA)
+  DV = get_distance(px, Bx, vALPHA)
   
   if DH < DV then
     Xt, Yt = Ax, Ay
+    print(DH, '<', DV)
   else
     Xt, Yt = Bx, By
+    print(DV, '<', DH)
   end
   love.graphics.setColor(255, 0, 0)
-  --love.graphics.circle('fill', Xt, Yt, 5)
+  love.graphics.circle('fill', Xt, Yt, 5)
   love.graphics.setColor(255, 255, 255)
 end
 
