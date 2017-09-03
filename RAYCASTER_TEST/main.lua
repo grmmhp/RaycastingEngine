@@ -63,10 +63,11 @@ function love.draw()
     Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
   end
   Xa=BLOCK_SIZE/math.tan(-player.a)
+  Ax = player.x + (player.y-Ay)/-math.tan(player.a)
 
 
-  lg.print(Xa .."\n".. Ay, 10, 40)
-  lg.circle("fill",Xa/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  lg.print(Ax .."\n".. Ay, 10, 40)
+  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
 end
 
 --
