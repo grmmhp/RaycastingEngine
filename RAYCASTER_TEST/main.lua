@@ -55,7 +55,7 @@ function love.draw()
   lg.setColor(255, 0, 255)
   lg.print(math.deg(player.a).."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
-  if isFacingUp(player.a) then
+  --[[if isFacingUp(player.a) then
     Ya=-BLOCK_SIZE
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
@@ -67,7 +67,8 @@ function love.draw()
 
 
   lg.print(Ax .."\n".. Ay, 10, 40)
-  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)]]
+  render()
 end
 
 --
@@ -107,10 +108,10 @@ end
 
 function render()
   -- screen width
-  local SW=lg.getWidth()
+  local SW=320--lg.getWidth()
 
-  for angle=0, SW, player.FOV/(SW-1) do
-    print(angle+player.a-player.FOV/2)
+  for angle=player.a+player.FOV/2, player.a-player.FOV/2, -player.FOV/(SW-1) do
+    --print(angle+player.a-player.FOV/2)
     distance = traceRay(angle, map)
   end
 end
@@ -121,7 +122,7 @@ function traceRay(angle, world)
   local Xa, Ya
   local Ax, Ay
 
-  if isFacingUp(player.a) then
+  if isFacingUp(angle) then
     Ya=-BLOCK_SIZE
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
@@ -134,7 +135,17 @@ function traceRay(angle, world)
   -- Xa*tan a = 64
   -- Xa = 64/tan a
 
-  Xa=64/math.tan(player.a)
+  --[[C.x=A.x+Xa = 115+36 = 151;
+   C.y=A.y+Ya = 191-64 = 127;]]
+
+  Xa=BLOCK_SIZE/math.tan(-angle)
+  Ax = player.x+(player.y-Ay)/math.tan(angle)
+
+  for n=1,10 do
+    lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,.5)
+    Ax=Ax+Xa
+    Ay=Ay+Ya
+  end
 
   return Ya
 end
