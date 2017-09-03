@@ -53,24 +53,14 @@ function love.draw()
   drawMiniMap()
 
   lg.setColor(255, 0, 255)
-  lg.print(math.deg(player.a+player.FOV/2) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
+  lg.print(math.deg(player.a) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
---[[if isFacingUp(player.a) then
-    Ya=-BLOCK_SIZE
-    Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
+  --render()
+  if isFacingUp(player.a) then
   else
-    Ya=BLOCK_SIZE
-    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
   end
-  Xa=BLOCK_SIZE/math.tan(-player.a)
-  Ax = player.x + (player.y-Ay)/-math.tan(player.a)]]
 
-
-
-  render()
-  --[[traceRay(player.a-player.FOV/2)
-  traceRay(player.a+player.FOV/2)
-  traceRay(player.a)]]
+  traceRay(player.a, map)
 end
 
 --
@@ -138,8 +128,11 @@ function traceRay(angle, world)
   Ax = player.x + (player.y-Ay)/math.tan(-angle)
 
   lg.setColor(255, 0, 255)
-  lg.print(Ax .."\n".. Ay, 10, 40)
   lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+
+  if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 then
+    return
+  end
 
   for n=1,10 do
     Ay=Ay+Ya
@@ -149,6 +142,10 @@ function traceRay(angle, world)
       Ax=Ax-Xa
     end
     lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+
+    if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 then
+      break
+    end
   end
 
   return Ya
@@ -162,15 +159,30 @@ function isFacingUp(angle)
   end
   return true
 end
+
 function isFacingRight(angle)
   if math.deg(angle)<90 and math.deg(angle)>270 then
     return true
   end
   return false
 end
+
+function outOfBounds(y, x)
+  if x<1 or x>#map[1] or y<1 or y>#map then return true end
+  return false
+end
+
+function index(y, x)
+  if not outOfBounds(y, x) then
+    return map[y][x]
+  end
+end
 -----------------------
 
+-- misc
 
+
+-----------------------
 
 
 function handleCollision()
