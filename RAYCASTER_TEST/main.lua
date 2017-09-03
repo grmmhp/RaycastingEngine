@@ -3,8 +3,7 @@ lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesys
 ---------------------------------------------------------------------------------------------------------------
 
 -- global variables
-MINI_MAP_TILE_SIZE=20
-
+MINI_MAP_TILE_SIZE=30
 BLOCK_SIZE=64
 a=true
 
@@ -53,11 +52,24 @@ end
 function love.draw()
   drawMiniMap()
 
-  lg.setColor(255, 255, 0)
-  lg.print(math.deg(player.a), 10, 10)
+  lg.setColor(255, 0, 255)
+  lg.print(math.deg(player.a).."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
+
+  if isFacingUp(player.a) then
+    Ya=-BLOCK_SIZE
+    Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
+  else
+    Ya=BLOCK_SIZE
+    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
+  end
+  Xa=BLOCK_SIZE/math.tan(-player.a)
+
+
+  lg.print(Xa .."\n".. Ay, 10, 40)
+  lg.circle("fill",Xa/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
 end
 
-
+--
 
 function input()
   if lk.isDown("w") then
@@ -80,7 +92,6 @@ function input()
   if lk.isDown("right") then
     player.a=player.a+player.av
   end
-
   if lk.isDown("left") then
     player.a=player.a-player.av
   end
@@ -106,14 +117,23 @@ end
 
 
 function traceRay(angle, world)
-  local Xa, Xy
+  local Xa, Ya
   local Ax, Ay
 
-  if isFacingUp(angle) then
+  if isFacingUp(player.a) then
     Ya=-BLOCK_SIZE
+    Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
     Ya=BLOCK_SIZE
+    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
   end
+
+
+  -- tan a = 64/Xa
+  -- Xa*tan a = 64
+  -- Xa = 64/tan a
+
+  Xa=64/math.tan(player.a)
 
   return Ya
 end
