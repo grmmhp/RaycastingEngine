@@ -72,9 +72,13 @@ local function castray(angle)
   while world[math.floor(Ay/64)][math.floor(Ax/64)] == 0 do
     Ax = Ax + Xa
     Ay = Ay + Ya
-    if Ax > #world[1]*64 or Ay > #world*64 or Ax < 64 or Ay < 64 then
-      --print('BREAK')
+    local _x, _y = math.ceil(Ax/64), math.ceil(Ay/64)
+    if outOfBounds(_x, _y) then
       break
+    else
+      if world[_y][_x]==1 then
+        break
+      end
     end
     love.graphics.setColor(0, 255, 0)
     love.graphics.circle('fill', Ax, Ay, 5)
@@ -104,9 +108,14 @@ local function castray(angle)
       love.graphics.setColor(0, 0, 255)
       love.graphics.circle('fill', Bx, By, 5)
       love.graphics.setColor(255, 255, 255)
-      if math.floor(Bx/64) > #world[1] or math.floor(By/64) > #world or Bx < 64 or By < 64 then
-        --print('BREAK2')
+
+      local _x, _y = math.ceil(Bx/64), math.ceil(By/64)
+      if outOfBounds(_x, _y) then
         break
+      else
+        if world[_y][_x]==1 then
+          break
+        end
       end
       --print('Bx', Bx, 'By', By)
     end
@@ -115,10 +124,17 @@ local function castray(angle)
   -- Fim Intersecção Vertical ----------------------------------------
 
   local DH, DV, Xt, Yt
+<<<<<<< HEAD
   
   DH = get_distance(px, Ax, hALPHA)
   DV = get_distance(px, Bx, vALPHA)
   
+=======
+
+  DH = get_distance(px, py, Ax, Ay)
+  DV = get_distance(px, py, Bx, By)
+
+>>>>>>> 043257fb4a451eb7f341ce3fdddf443249fa16c6
   if DH < DV then
     Xt, Yt = Ax, Ay
     print(DH, '<', DV)
@@ -161,6 +177,11 @@ function love.update(dt)
   if pr >= 360 or pr <= -360 then
     pr = 0
   end
+end
+
+function outOfBounds(x, y)
+  if x<1 or x>#world[1] or y<1 or y>#world then return true end
+  return false
 end
 
 function love.draw()
