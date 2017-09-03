@@ -25,7 +25,7 @@ local world = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 local px, py, pr, pv, prv = 218,  218,  0,  2,  2
 local FOV = 60
 local w, h = 320, 200
-local eachangle = w/FOV
+local eachangle = FOV/w
 local distance = (w/2)/math.tan(math.rad(FOV/2))
 local angleoffset = 80
 local dir = ""
@@ -69,18 +69,18 @@ local function castray(angle)
   while world[math.floor(Ay/64)][math.floor(Ax/64)] == 0 do
     Ax = Ax + Xa
     Ay = Ay + Ya
+    if Ax > #world[1]*64 or Ay > #world*64 or Ax < 64 or Ay < 64 then
+      --print('BREAK')
+      break
+    end
     love.graphics.setColor(0, 255, 0)
     love.graphics.circle('fill', Ax, Ay, 3)
     love.graphics.setColor(255, 255, 255)
-    if Ax > #world[1]*64 or Ay > #world*64 then
-      print('BREAK')
-      break
-    end
   end
   -- Fim Intersecção Horizontal ----------------------------------------
 
   -- Intersecção Vertical ----------------------------------------
-  --[[if angle < 90 and angle > -90 or angle > 270 or angle < -270 then
+  if angle < 90 and angle > -90 or angle > 270 or angle < -270 then
     dir2 = "RIGHT"
     Bx = math.floor(px/64)*64+64
     Xb = 64
@@ -91,18 +91,21 @@ local function castray(angle)
   end
   By = py + (px-Bx)*math.tan(ALPHA)
   Yb = 64*math.tan(ALPHA)
-  print('Bx', Bx, 'By', By)
-  while world[math.floor(By/64)][math.floor(Bx/64)] == 0 do
-    Bx = Bx + Xb
-    By = By + Yb
-    love.graphics.setColor(0, 0, 255)
-    love.graphics.circle('fill', Bx, By, 3)
-    love.graphics.setColor(255, 255, 255)
-    if math.floor(Bx/64) > #world[1] or math.floor(By/64) > #world or Bx < 64 or By < 64 then
-      print('BREAK2')
-      break
+  --print('Bx', Bx, 'By', By)
+  if By < #world[1]*64 and By < #world*64 and Bx > 64 and By > 64 then
+    while world[math.floor(By/64)][math.floor(Bx/64)] == 0 do
+      Bx = Bx + Xb
+      By = By + Yb
+      love.graphics.setColor(0, 0, 255)
+      love.graphics.circle('fill', Bx, By, 3)
+      love.graphics.setColor(255, 255, 255)
+      if math.floor(Bx/64) > #world[1] or math.floor(By/64) > #world or Bx < 64 or By < 64 then
+        --print('BREAK2')
+        break
+      end
+      --print('Bx', Bx, 'By', By)
     end
-  end]]
+  end
 
   -- Fim Intersecção Vertical ----------------------------------------
 
@@ -152,8 +155,8 @@ function love.draw()
   love.graphics.rectangle('fill', px, py, 32, 32)
   love.graphics.line(px+16, py+16, px+16+math.cos(math.rad(pr))*50, py+16+math.sin(math.rad(pr))*50)
   local a = 0
-  for i=0, 29 do
-    castray(a+pr-100)
+  for i=0, w-1 do
+    castray(a+pr)
     a = a + eachangle
   end
 end
