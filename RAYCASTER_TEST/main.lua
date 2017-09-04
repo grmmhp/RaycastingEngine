@@ -3,7 +3,7 @@ lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesys
 ---------------------------------------------------------------------------------------------------------------
 
 -- global variables
-MINI_MAP_TILE_SIZE=30
+MINI_MAP_TILE_SIZE=5
 BLOCK_SIZE=64
 a=true
 
@@ -50,8 +50,6 @@ function love.update(dt)
 end
 
 function love.draw()
-  drawMiniMap()
-
   lg.setColor(255, 0, 255)
   lg.print(math.deg(player.a) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
@@ -78,12 +76,8 @@ function love.draw()
       By=By-Yb
     end
   end]]
-  --render()
-  local a = 0
-  for i=0, lg.getWidth()-1 do
-    traceRay(a+player.a-math.pi/6, map, i)
-    a = a + player.FOV/lg.getWidth()
-  end
+  render()
+  drawMiniMap(10, 10)
 end
 
 --
@@ -94,23 +88,23 @@ function input()
     player.y=player.y+player.v*math.sin(player.a)
   end
   if lk.isDown("a") then
-    player.x=player.x-player.v*math.cos(player.a+math.rad(90))
-    player.y=player.y-player.v*math.sin(player.a+math.rad(90))
+    player.x=player.x-player.v*math.cos(player.a-math.rad(90))
+    player.y=player.y-player.v*math.sin(player.a-math.rad(90))
   end
   if lk.isDown("s") then
     player.x=player.x-player.v*math.cos(player.a)
     player.y=player.y-player.v*math.sin(player.a)
   end
   if lk.isDown("d") then
-    player.x=player.x-player.v*math.cos(player.a-math.rad(90))
-    player.y=player.y-player.v*math.sin(player.a-math.rad(90))
+    player.x=player.x-player.v*math.cos(player.a+math.rad(90))
+    player.y=player.y-player.v*math.sin(player.a+math.rad(90))
   end
 
   if lk.isDown("right") then
-    player.a=player.a+player.av
+    player.a=player.a-player.av
   end
   if lk.isDown("left") then
-    player.a=player.a-player.av
+    player.a=player.a+player.av
   end
 
   player.a=player.a%math.rad(360)
@@ -123,15 +117,25 @@ end
 
 function render()
   -- screen width
-  local SW=320--lg.getWidth()
+  local SW=lg.getWidth()
+  local x=0
 
   for angle=player.a+player.FOV/2, player.a-player.FOV/2, -player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
     distance = traceRay(angle, map)
+    distance=distance*math.cos(player.FOV/2-angle)
+
+    distProjPlane=SW/(2*math.tan(player.FOV/2))
+    sliceHeight=BLOCK_SIZE/distance*distProjPlane
+    drawVerticalStrip(x, sliceHeight)
+    x=x+1
   end
 end
 
-
+function drawVerticalStrip(x, height)
+  lg.setColor(255,0,0)
+  lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
+end
 
 function traceRay(angle, world, strip)
   angle=angle%math.rad(360)
@@ -212,18 +216,14 @@ function traceRay(angle, world, strip)
 
   lg.setColor(255,255,0)
   local distancetoproj = lg.getWidth()/math.tan(player.FOV)
-  if distanceh<distancev then
+  --[[if distanceh<distancev then
     local h = (64/distanceh)*distancetoproj
     lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
     lg.line(strip, lg.getHeight()/2+h/2, strip, lg.getHeight()/2-h/2)
   else
     local h = (64/distancev)*distancetoproj
-    lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
-    lg.line(strip, lg.getHeight()/2+h/2, strip, lg.getHeight()/2-h/2)
-  end
-
-  lg.setColor(255,0,255)
-  lg.print(distanceh.."\n"..distancev,10,50)
+    --lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
+  end]]
 
   return math.min(distanceh, distancev)
 end
@@ -290,17 +290,17 @@ function drawMiniMap(x, y)
   -- draw mini player
 
   local Px,Py=player.x,player.y
-  lg.setColor(255,0,0)
-  lg.circle("fill",Px/BLOCK_SIZE*MINI_MAP_TILE_SIZE+x, Py/BLOCK_SIZE*MINI_MAP_TILE_SIZE+y, 5)
-
   LINE_SIZE=50
   lg.setColor(0,255,0)
   Px,Py=Px/BLOCK_SIZE*MINI_MAP_TILE_SIZE+x,Py/BLOCK_SIZE*MINI_MAP_TILE_SIZE+y
   lg.line(Px,Py,Px+LINE_SIZE*math.cos(player.a),Py+LINE_SIZE*math.sin(player.a))
 
+  lg.setColor(255,0,0)
+  lg.circle("fill",Px/BLOCK_SIZE*MINI_MAP_TILE_SIZE+x, Py/BLOCK_SIZE*MINI_MAP_TILE_SIZE+y, 10*MINI_MAP_TILE_SIZE/30)
+
 
   lg.setColor(0,0,255)
-  local angle_left, angle_right = player.a-player.FOV/2, player.a+player.FOV/2
-  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_left),Py+LINE_SIZE*math.sin(angle_left))
-  lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_right),Py+LINE_SIZE*math.sin(angle_right))
+  --local angle_left, angle_right = player.a-player.FOV/2, player.a+player.FOV/2
+  --lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_left),Py+LINE_SIZE*math.sin(angle_left))
+  --lg.line(Px,Py,Px+LINE_SIZE*math.cos(angle_right),Py+LINE_SIZE*math.sin(angle_right))
 end
