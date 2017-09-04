@@ -53,29 +53,6 @@ function love.draw()
   lg.setColor(255, 0, 255)
   lg.print(math.deg(player.a) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
-  --render()
-  --[[if isFacingRight(player.a) then
-    Xb=BLOCK_SIZE
-    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+1
-  else
-    Xb=-BLOCK_SIZE
-    Bx=math.floor(player.x/BLOCK_SIZE)*BLOCK_SIZE
-  end
-  Yb=math.tan(player.a)*BLOCK_SIZE
-  By=player.y + (player.x-Bx)*math.tan(-player.a)
-
-  for n=1,10 do
-    lg.setColor(255, 0, 255)
-    lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
-    lg.print(By.. ", ".. math.ceil(By/64), 10, 40)
-
-    Bx=Bx+Xb
-    if isFacingRight(player.a) then
-      By=By+Yb
-    else
-      By=By-Yb
-    end
-  end]]
   render()
   drawMiniMap(10, 10)
 end
@@ -123,7 +100,7 @@ function render()
   for angle=player.a+player.FOV/2, player.a-player.FOV/2, -player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
     distance = traceRay(angle, map)
-    distance=distance*math.cos(player.FOV/2-angle)
+    distance=distance*math.cos(player.a-angle)
 
     distProjPlane=SW/(2*math.tan(player.FOV/2))
     sliceHeight=BLOCK_SIZE/distance*distProjPlane
@@ -157,13 +134,8 @@ function traceRay(angle, world, strip)
   Ax = player.x + (player.y-Ay)/math.tan(-angle)
 
   lg.setColor(255, 0, 255)
-  --lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
-
   while true do    --lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
     if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 or outOfBounds(math.ceil(Ay/64), math.ceil(Ax/64)) then
-      --[[lg.setColor(255,255,0)
-      lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE)]]
-
       -- gets the distance from wall to the player
       distanceh=math.sqrt((player.x-Ax)^2+(player.y-Ay)^2)
       break
@@ -177,8 +149,6 @@ function traceRay(angle, world, strip)
     end
   end
 
-
-
   -- Checks for vertical intersections
   if isFacingRight(angle) then
     Xb=BLOCK_SIZE
@@ -191,20 +161,12 @@ function traceRay(angle, world, strip)
   By=player.y + (player.x-Bx)*math.tan(-angle)
 
   while true do
-    --lg.setColor(255, 0, 255)
-    --lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
     if index(math.ceil(By/64), math.ceil(Bx/64))==1 or outOfBounds(math.ceil(By/64), math.ceil(Bx/64)) then
-      --[[lg.setColor(255,255,0)
-      lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)]]
 
       -- gets the distance from wall to the player
       distancev=math.sqrt((player.x-Bx)^2+(player.y-By)^2)
       break
     end
-    --[[lg.setColor(255, 0, 255)
-    lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
-    lg.print(By.. ", ".. math.ceil(By/64), 10, 40)]]
-
 
     Bx=Bx+Xb
     if isFacingRight(angle) then
