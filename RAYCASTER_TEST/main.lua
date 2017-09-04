@@ -79,8 +79,11 @@ function love.draw()
     end
   end]]
   --render()
-
-  traceRay(player.a, map)
+  local a = 0
+  for i=0, lg.getWidth()-1 do
+    traceRay(a+player.a-math.pi/6, map, i)
+    a = a + player.FOV/lg.getWidth()
+  end
 end
 
 --
@@ -130,8 +133,7 @@ end
 
 
 
-function traceRay(angle, world)
-  local strip = angle
+function traceRay(angle, world, strip)
   angle=angle%math.rad(360)
   local distanceh, distancev
 
