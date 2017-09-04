@@ -45,10 +45,10 @@ function drawMap(map)
   end
 end
 
-function get_distance(px, x, alpha) return (px-x)/math.cos(alpha) end
+function get_distance(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 
 
-local function castray(angle)
+local function castray(angle, strip)
 
   local Ay, Ax, By, Bx, Ya, Xa, Xb, Yb, ALPHA, hALPHA, vALPHA
 
@@ -72,20 +72,16 @@ local function castray(angle)
   while world[math.floor(Ay/64)][math.floor(Ax/64)] == 0 do
     Ax = Ax + Xa
     Ay = Ay + Ya
-    local _x, _y = math.ceil(Ax/64), math.ceil(Ay/64)
-    if outOfBounds(_x, _y) then
+    if Ax > #world[1]*64 or Ay > #world*64 or Ax < 64 or Ay < 64 then
+      Ax, Ay = 99999, 99999
+      --print('BREAK')
       break
-    else
-      if world[_y][_x]==1 then
-        break
-      end
     end
-    love.graphics.setColor(0, 255, 0)
-    love.graphics.circle('fill', Ax, Ay, 5)
+    love.graphics.setColor(0, 255, 0, 50)
+    --love.graphics.circle('fill', Ax, Ay, 2)
     love.graphics.setColor(255, 255, 255)
   end
   -- Fim Intersecção Horizontal ----------------------------------------
-
   -- Intersecção Vertical ----------------------------------------
   if ALPHA < math.pi/2 and ALPHA > -math.pi/2 or ALPHA > 3*(math.pi/2) or ALPHA < -3*(math.pi/2) then
     dir2 = "RIGHT"
@@ -94,7 +90,7 @@ local function castray(angle)
     vALPHA = math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   else
     dir2 = "LEFT"
-    Bx = math.floor(px/64)*64
+    Bx = math.floor(px/64)*64-64
     Xb = -64
     vALPHA = -math.atan2(math.sin(math.rad(angle)), math.cos(math.rad(angle)))
   end
@@ -105,46 +101,42 @@ local function castray(angle)
     while world[math.floor(By/64)][math.floor(Bx/64)] == 0 do
       Bx = Bx + Xb
       By = By + Yb
-      love.graphics.setColor(0, 0, 255)
-      love.graphics.circle('fill', Bx, By, 5)
+      love.graphics.setColor(0, 0, 255, 50)
+      --love.graphics.circle('fill', Bx, By, 5))
       love.graphics.setColor(255, 255, 255)
-
-      local _x, _y = math.ceil(Bx/64), math.ceil(By/64)
-      if outOfBounds(_x, _y) then
+      if math.floor(Bx/64) > #world[1] or math.floor(By/64) > #world or Bx < 64 or By < 64 then
+        Bx, By = 99999, 99999
+        --print('BREAK2')
         break
-      else
-        if world[_y][_x]==1 then
-          break
-        end
       end
       --print('Bx', Bx, 'By', By)
     end
   end
-
   -- Fim Intersecção Vertical ----------------------------------------
-
-  local DH, DV, Xt, Yt
-<<<<<<< HEAD
+  --print('Bloco em (Ax)', math.floor(Ax/64), math.floor(Ay/64))
+  --print('Bloco em (Bx)', math.floor(Bx/64), math.floor(By/64))
+  local DH, DV, Xt, Yt, d
   
-  DH = get_distance(px, Ax, hALPHA)
-  DV = get_distance(px, Bx, vALPHA)
-  
-=======
-
   DH = get_distance(px, py, Ax, Ay)
   DV = get_distance(px, py, Bx, By)
-
->>>>>>> 043257fb4a451eb7f341ce3fdddf443249fa16c6
+  
   if DH < DV then
     Xt, Yt = Ax, Ay
-    print(DH, '<', DV)
+    d = DH
+    --print(DH, '<', DV)
   else
     Xt, Yt = Bx, By
-    print(DV, '<', DH)
+    d = DV
+    --print(DV, '<', DH)
   end
-  love.graphics.setColor(255, 0, 0)
-  love.graphics.circle('fill', Xt, Yt, 5)
+  
+  local s = (64/d)*distance --(64 / 330) * 277
+  love.graphics.setColor(255, 0, 0, 30)
+  --love.graphics.circle('fill', Xt, Yt, 5)
+  --love.graphics.line(strip, h/2+(s/2), strip, h/2-(s/2))
+  love.graphics.line(px, py, Xt, Yt)
   love.graphics.setColor(255, 255, 255)
+  
 end
 
 function love.load()
@@ -179,11 +171,6 @@ function love.update(dt)
   end
 end
 
-function outOfBounds(x, y)
-  if x<1 or x>#world[1] or y<1 or y>#world then return true end
-  return false
-end
-
 function love.draw()
   love.graphics.print(pr.." "..dir.." "..dir2)
   love.graphics.scale(0.4)
@@ -191,8 +178,8 @@ function love.draw()
   love.graphics.rectangle('fill', px, py, 32, 32)
   love.graphics.line(px+16, py+16, px+16+math.cos(math.rad(pr))*50, py+16+math.sin(math.rad(pr))*50)
   local a = 0
-  for i=0, w-1 do
-    castray(pr+a+-20)
+  for i=-w/2, w/2-1 do
+    castray(pr+a, i)
     a = a + eachangle
   end
 end
