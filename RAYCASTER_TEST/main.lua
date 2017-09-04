@@ -65,23 +65,23 @@ function input()
     player.y=player.y+player.v*math.sin(player.a)
   end
   if lk.isDown("a") then
-    player.x=player.x-player.v*math.cos(player.a-math.rad(90))
-    player.y=player.y-player.v*math.sin(player.a-math.rad(90))
+    player.x=player.x-player.v*math.cos(player.a+math.rad(90))
+    player.y=player.y-player.v*math.sin(player.a+math.rad(90))
   end
   if lk.isDown("s") then
     player.x=player.x-player.v*math.cos(player.a)
     player.y=player.y-player.v*math.sin(player.a)
   end
   if lk.isDown("d") then
-    player.x=player.x-player.v*math.cos(player.a+math.rad(90))
-    player.y=player.y-player.v*math.sin(player.a+math.rad(90))
+    player.x=player.x-player.v*math.cos(player.a-math.rad(90))
+    player.y=player.y-player.v*math.sin(player.a-math.rad(90))
   end
 
   if lk.isDown("right") then
-    player.a=player.a-player.av
+    player.a=player.a+player.av
   end
   if lk.isDown("left") then
-    player.a=player.a+player.av
+    player.a=player.a-player.av
   end
 
   player.a=player.a%math.rad(360)
@@ -97,7 +97,7 @@ function render()
   local SW=lg.getWidth()
   local x=0
 
-  for angle=player.a+player.FOV/2, player.a-player.FOV/2, -player.FOV/(SW-1) do
+  for angle=player.a-player.FOV/2, player.a+player.FOV/2, player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
     distance = traceRay(angle, map)
     distance=distance*math.cos(player.a-angle)
