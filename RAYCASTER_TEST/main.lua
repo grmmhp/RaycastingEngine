@@ -56,11 +56,31 @@ function love.draw()
   lg.print(math.deg(player.a) .."\n"..math.ceil(player.x/64) ..", ".. math.ceil(player.y/64), 10, 10)
 
   --render()
-  if isFacingUp(player.a) then
+  --[[if isFacingRight(player.a) then
+    Xb=BLOCK_SIZE
+    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+1
   else
+    Xb=-BLOCK_SIZE
+    Bx=math.floor(player.x/BLOCK_SIZE)*BLOCK_SIZE
   end
+  Yb=math.tan(player.a)*BLOCK_SIZE
+  By=player.y + (player.x-Bx)*math.tan(-player.a)
 
-  traceRay(player.a, map)
+  for n=1,10 do
+    lg.setColor(255, 0, 255)
+    lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+    lg.print(By.. ", ".. math.ceil(By/64), 10, 40)
+
+    Bx=Bx+Xb
+    if isFacingRight(player.a) then
+      By=By+Yb
+    else
+      By=By-Yb
+    end
+  end]]
+  render()
+
+--  traceRay(player.a, map)
 end
 
 --
@@ -112,10 +132,12 @@ end
 
 function traceRay(angle, world)
   angle=angle%math.rad(360)
+  local distanceh, distancev
 
   local Xa, Ya
   local Ax, Ay
 
+  -- Checks for horizontal intersections
   if isFacingUp(angle) then
     Ya=-BLOCK_SIZE
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
@@ -128,27 +150,71 @@ function traceRay(angle, world)
   Ax = player.x + (player.y-Ay)/math.tan(-angle)
 
   lg.setColor(255, 0, 255)
-  lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  --lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
 
-  if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 then
-    return
-  end
+  while true do    --lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+    if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 or outOfBounds(math.ceil(Ay/64), math.ceil(Ax/64)) then
+      --[[lg.setColor(255,255,0)
+      lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE)]]
 
-  for n=1,10 do
+      -- gets the distance from wall to the player
+      distanceh=math.sqrt((player.x-Ax)^2+(player.y-Ay))
+      break
+    end
+
     Ay=Ay+Ya
     if isFacingUp(angle) then
       Ax=Ax+Xa
     else
       Ax=Ax-Xa
     end
-    lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  end
 
-    if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 then
+
+
+  -- Checks for vertical intersections
+  if isFacingRight(angle) then
+    Xb=BLOCK_SIZE
+    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+1
+  else
+    Xb=-BLOCK_SIZE
+    Bx=math.floor(player.x/BLOCK_SIZE)*BLOCK_SIZE
+  end
+  Yb=math.tan(angle)*BLOCK_SIZE
+  By=player.y + (player.x-Bx)*math.tan(-angle)
+
+  while true do
+    --lg.setColor(255, 0, 255)
+    --lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+    if index(math.ceil(By/64), math.ceil(Bx/64))==1 or outOfBounds(math.ceil(By/64), math.ceil(Bx/64)) then
+      --[[lg.setColor(255,255,0)
+      lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)]]
+
+      -- gets the distance from wall to the player
+      distancev=math.sqrt((player.x-Bx)^2+(player.y-By))
       break
+    end
+    --[[lg.setColor(255, 0, 255)
+    lg.circle("fill",Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+    lg.print(By.. ", ".. math.ceil(By/64), 10, 40)]]
+
+
+    Bx=Bx+Xb
+    if isFacingRight(angle) then
+      By=By+Yb
+    else
+      By=By-Yb
     end
   end
 
-  return Ya
+  lg.setColor(255,255,0)
+  if distanceh<distancev then
+    lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
+  else
+    lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
+  end
+
+  return math.min(distanceh, distancev)
 end
 
 
@@ -161,7 +227,7 @@ function isFacingUp(angle)
 end
 
 function isFacingRight(angle)
-  if math.deg(angle)<90 and math.deg(angle)>270 then
+  if math.deg(angle)<90 or math.deg(angle)>270 then
     return true
   end
   return false
