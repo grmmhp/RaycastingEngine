@@ -78,9 +78,9 @@ function love.draw()
       By=By-Yb
     end
   end]]
-  render()
+  --render()
 
---  traceRay(player.a, map)
+  traceRay(player.a, map)
 end
 
 --
@@ -219,6 +219,9 @@ function traceRay(angle, world)
     lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
     lg.line(strip, lg.getHeight()/2+h/2, strip, lg.getHeight()/2-h/2)
   end
+
+  lg.setColor(255,0,255)
+  lg.print(distanceh.."\n"..distancev,10,50)
 
   return math.min(distanceh, distancev)
 end
