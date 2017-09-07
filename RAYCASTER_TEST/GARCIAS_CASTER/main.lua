@@ -116,10 +116,10 @@ local function castray(angle, strip)
   --print('Bloco em (Ax)', math.floor(Ax/64), math.floor(Ay/64))
   --print('Bloco em (Bx)', math.floor(Bx/64), math.floor(By/64))
   local DH, DV, Xt, Yt, d
-  
+
   DH = get_distance(px, py, Ax, Ay)
   DV = get_distance(px, py, Bx, By)
-  
+
   if DH < DV then
     Xt, Yt = Ax, Ay
     d = DH
@@ -129,14 +129,14 @@ local function castray(angle, strip)
     d = DV
     --print(DV, '<', DH)
   end
-  
+
   local s = (64/d)*distance --(64 / 330) * 277
   love.graphics.setColor(255, 0, 0, 30)
   --love.graphics.circle('fill', Xt, Yt, 5)
   --love.graphics.line(strip, h/2+(s/2), strip, h/2-(s/2))
   love.graphics.line(px, py, Xt, Yt)
-  love.graphics.setColor(255, 255, 255)
-  
+  love.graphics.setColor(255, 255, 255, 255)
+
 end
 
 function love.load()

@@ -5,6 +5,7 @@ lg, lm, lk, lfs, lw, lt = love.graphics, love.mouse, love.keyboard, love.filesys
 -- global variables
 MINI_MAP_TILE_SIZE=5
 BLOCK_SIZE=64
+TEXTURE_SIZE=64
 a=true
 
 --
@@ -17,6 +18,8 @@ player={
   av=.05,
   FOV=math.rad(60),
 }
+
+texture={}
 
 map={
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -39,10 +42,10 @@ map={
   {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
   {1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-
 }
 
 function love.load()
+  texture.initialize()
 end
 
 function love.update(dt)
@@ -56,6 +59,23 @@ function love.draw()
   render()
   drawMiniMap(10, 10)
 end
+
+-- texture functions
+function texture.initialize()
+  texture.image=lg.newImage("wall.png")
+  texture.image:setFilter("nearest","linear")
+
+  texture.slices={}
+  texture.slice()
+end
+
+function texture.slice()
+  local img=texture.image
+  for x=0,TEXTURE_SIZE-1 do
+    texture.slices[x]=lg.newQuad(x,0,1,TEXTURE_SIZE,img:getDimensions())
+  end
+end
+
 
 --
 
@@ -93,28 +113,53 @@ end
 -- raycaster functions
 
 function render()
-  -- screen width
-  local SW=lg.getWidth()
+  local SW=lg.getWidth() -- screen width
   local x=0
+
+  lg.setColor(100,100,100,255)
+  lg.rectangle("fill",0,0,lg.getWidth(),lg.getHeight()/2)
+  lg.setColor(25,25,25,255)
+  lg.rectangle("fill",0,lg.getHeight()/2,lg.getWidth(),lg.getHeight()/2)
 
   for angle=player.a-player.FOV/2, player.a+player.FOV/2, player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
-    distance = traceRay(angle, map)
-    distance=distance*math.cos(player.a-angle)
+    hit=traceRay(angle, map)
+    distance=hit.distance
+    distance=distance--*math.cos(player.a-angle)
+
+    slice=hit.slice
+    _type=hit._type
 
     distProjPlane=SW/(2*math.tan(player.FOV/2))
     sliceHeight=BLOCK_SIZE/distance*distProjPlane
-    drawVerticalStrip(x, sliceHeight)
+    drawVerticalStrip(x, slice, sliceHeight, distance, _type)
     x=x+1
+
+    lg.setColor(255,255,255,10000)
+    lg.draw(texture.image, texture.slices[1],50, 50)
   end
 end
 
-function drawVerticalStrip(x, height)
-  lg.setColor(255,0,0)
+function drawVerticalStrip(x, slice, height, distance, hitType)
+  if hitType=="horizontal" then
+    lg.setColor(255,0,0,255)
+  else
+    lg.setColor(200,0,0,255)
+  end
+
   lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
+  scale=BLOCK_SIZE*height
+  lg.setColor(255,255,255,255)
+  --lg.draw(texture.image, texture.slices[1], x, (lg.getHeight()-height)/2, 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
 end
 
 function traceRay(angle, world, strip)
+  local hit={
+    distance,
+    slice,
+    _type,
+  }
+
   angle=angle%math.rad(360)
   local distanceh, distancev
 
@@ -127,17 +172,16 @@ function traceRay(angle, world, strip)
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
     Ya=BLOCK_SIZE
-    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+1
+    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+0.01
   end
 
   Xa=BLOCK_SIZE/math.tan(-angle)
   Ax = player.x + (player.y-Ay)/math.tan(-angle)
 
   lg.setColor(255, 0, 255)
-  while true do    --lg.circle("fill",Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE,5)
+  while true do
     if index(math.ceil(Ay/64), math.ceil(Ax/64))==1 or outOfBounds(math.ceil(Ay/64), math.ceil(Ax/64)) then
-      -- gets the distance from wall to the player
-      distanceh=math.sqrt((player.x-Ax)^2+(player.y-Ay)^2)
+      distanceh=math.sqrt((player.x-Ax)^2+(player.y-Ay)^2) -- gets the distance from wall to the player
       break
     end
 
@@ -152,7 +196,7 @@ function traceRay(angle, world, strip)
   -- Checks for vertical intersections
   if isFacingRight(angle) then
     Xb=BLOCK_SIZE
-    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+1
+    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+0.01
   else
     Xb=-BLOCK_SIZE
     Bx=math.floor(player.x/BLOCK_SIZE)*BLOCK_SIZE
@@ -162,9 +206,7 @@ function traceRay(angle, world, strip)
 
   while true do
     if index(math.ceil(By/64), math.ceil(Bx/64))==1 or outOfBounds(math.ceil(By/64), math.ceil(Bx/64)) then
-
-      -- gets the distance from wall to the player
-      distancev=math.sqrt((player.x-Bx)^2+(player.y-By)^2)
+      distancev=math.sqrt((player.x-Bx)^2+(player.y-By)^2) -- gets the distance from wall to the player
       break
     end
 
@@ -176,18 +218,17 @@ function traceRay(angle, world, strip)
     end
   end
 
-  lg.setColor(255,255,0)
-  local distancetoproj = lg.getWidth()/math.tan(player.FOV)
-  --[[if distanceh<distancev then
-    local h = (64/distanceh)*distancetoproj
-    lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ax/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Ay/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
-    lg.line(strip, lg.getHeight()/2+h/2, strip, lg.getHeight()/2-h/2)
+  if distanceh<distancev then
+    hit.distance=distanceh
+    hit.slice=Ax%BLOCK_SIZE
+    hit._type="horizontal"
   else
-    local h = (64/distancev)*distancetoproj
-    --lg.line(player.x/BLOCK_SIZE*MINI_MAP_TILE_SIZE,player.y/BLOCK_SIZE*MINI_MAP_TILE_SIZE,Bx/BLOCK_SIZE*MINI_MAP_TILE_SIZE,By/BLOCK_SIZE*MINI_MAP_TILE_SIZE)
-  end]]
+    hit.distance=distancev
+    hit.slice=By%BLOCK_SIZE
+    hit._verticalHit="vertical"
+  end
 
-  return math.min(distanceh, distancev)
+  return hit
 end
 
 
