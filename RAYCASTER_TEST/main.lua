@@ -19,6 +19,13 @@ player={
   FOV=math.rad(60),
 }
 
+mouseController={
+  dx=0,
+  dy=0,
+  lastX=lm.getX(),
+  lastY=lm.getY(),
+}
+
 texture={}
 
 map={
@@ -46,10 +53,17 @@ map={
 
 function love.load()
   texture.initialize()
+
+  lm.setVisible(false)
 end
 
 function love.update(dt)
+  mouseController.update()
   input()
+
+  if lk.isDown("escape") then
+    love.event.quit(0)
+  end
 end
 
 function love.draw()
@@ -58,6 +72,9 @@ function love.draw()
 
   render()
   drawMiniMap(10, 10)
+
+  lg.setColor(255,255,0)
+  lg.print(mouseController.dx.. ", ".. mouseController.dy, 10, 110)
 end
 
 -- texture functions
@@ -79,6 +96,18 @@ end
 
 --
 
+function mouseController.update()
+  local mc=mouseController
+  mx,my=lm.getPosition()
+  mc.dx,mc.dy=mx-mc.lastX,my-mc.lastY
+
+lm.setPosition(lg.getWidth()/2,lg.getHeight()/2)
+  mc.lastX,mc.lastY=lm.getPosition()
+
+end
+
+-- player input
+
 function input()
   if lk.isDown("w") then
     player.x=player.x+player.v*math.cos(player.a)
@@ -97,12 +126,7 @@ function input()
     player.y=player.y-player.v*math.sin(player.a-math.rad(90))
   end
 
-  if lk.isDown("right") then
-    player.a=player.a+player.av
-  end
-  if lk.isDown("left") then
-    player.a=player.a-player.av
-  end
+  player.a=player.a+math.rad(mouseController.dx)*.5--player.av
 
   player.a=player.a%math.rad(360)
 end
@@ -116,16 +140,16 @@ function render()
   local SW=lg.getWidth() -- screen width
   local x=0
 
-  lg.setColor(100,100,100,255)
+  lg.setColor(100,100,100,511)
   lg.rectangle("fill",0,0,lg.getWidth(),lg.getHeight()/2)
-  lg.setColor(25,25,25,255)
+  lg.setColor(25,25,25,511)
   lg.rectangle("fill",0,lg.getHeight()/2,lg.getWidth(),lg.getHeight()/2)
 
   for angle=player.a-player.FOV/2, player.a+player.FOV/2, player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
     hit=traceRay(angle, map)
     distance=hit.distance
-    distance=distance--*math.cos(player.a-angle)
+    distance=distance*math.cos(player.a-angle)
 
     slice=hit.slice
     _type=hit._type
@@ -142,14 +166,13 @@ end
 
 function drawVerticalStrip(x, slice, height, distance, hitType)
   if hitType=="horizontal" then
-    lg.setColor(255,0,0,255)
+    lg.setColor(255,0,0,511)
   else
-    lg.setColor(200,0,0,255)
+    lg.setColor(200,0,0,511)
   end
 
   lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
   scale=BLOCK_SIZE*height
-  lg.setColor(255,255,255,255)
   --lg.draw(texture.image, texture.slices[1], x, (lg.getHeight()-height)/2, 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
 end
 
@@ -172,7 +195,7 @@ function traceRay(angle, world, strip)
     Ay=math.floor(player.y/BLOCK_SIZE)*BLOCK_SIZE
   else
     Ya=BLOCK_SIZE
-    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+0.01
+    Ay=math.ceil(player.y/BLOCK_SIZE)*BLOCK_SIZE+0.0001
   end
 
   Xa=BLOCK_SIZE/math.tan(-angle)
@@ -196,7 +219,7 @@ function traceRay(angle, world, strip)
   -- Checks for vertical intersections
   if isFacingRight(angle) then
     Xb=BLOCK_SIZE
-    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+0.01
+    Bx=math.ceil(player.x/BLOCK_SIZE)*BLOCK_SIZE+0.0001
   else
     Xb=-BLOCK_SIZE
     Bx=math.floor(player.x/BLOCK_SIZE)*BLOCK_SIZE
