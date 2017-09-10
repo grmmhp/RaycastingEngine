@@ -77,7 +77,7 @@ end
 -- texture functions
 function texture.initialize()
   texture.image=lg.newImage("wall.png")
-  texture.image:setFilter("nearest","linear")
+  texture.image:setFilter("nearest","nearest")
 
   texture.slices={}
   texture.slice()
@@ -170,7 +170,7 @@ function drawVerticalStrip(x, slice, height, distance, hitType)
 
   --lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
   scale=height/BLOCK_SIZE
-  lg.draw(texture.image, texture.slices[slice], x, (lg.getHeight()-height/2), 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
+  lg.draw(texture.image, texture.slices[slice], x, (lg.getHeight()-BLOCK_SIZE)/2, 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
 end
 
 function traceRay(angle, world, strip)
