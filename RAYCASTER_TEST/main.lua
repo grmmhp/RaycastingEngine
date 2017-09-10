@@ -72,9 +72,6 @@ function love.draw()
 
   render()
   drawMiniMap(10, 10)
-
-  lg.setColor(255,255,0)
-  lg.print(mouseController.dx.. ", ".. mouseController.dy, 10, 110)
 end
 
 -- texture functions
@@ -94,7 +91,7 @@ function texture.slice()
 end
 
 
---
+-- player input
 
 function mouseController.update()
   local mc=mouseController
@@ -106,7 +103,7 @@ lm.setPosition(lg.getWidth()/2,lg.getHeight()/2)
 
 end
 
--- player input
+
 
 function input()
   if lk.isDown("w") then
@@ -148,11 +145,11 @@ function render()
   for angle=player.a-player.FOV/2, player.a+player.FOV/2, player.FOV/(SW-1) do
     --print(angle+player.a-player.FOV/2)
     hit=traceRay(angle, map)
-    distance=hit.distance
-    distance=distance*math.cos(player.a-angle)
+    local distance=hit.distance
+    local slice=hit.slice
+    local _type=hit._type
 
-    slice=hit.slice
-    _type=hit._type
+    distance=distance*math.cos(player.a-angle)
 
     distProjPlane=SW/(2*math.tan(player.FOV/2))
     sliceHeight=BLOCK_SIZE/distance*distProjPlane
@@ -166,14 +163,14 @@ end
 
 function drawVerticalStrip(x, slice, height, distance, hitType)
   if hitType=="horizontal" then
-    lg.setColor(255,0,0,511)
+    lg.setColor(255,255,255,511)
   else
-    lg.setColor(200,0,0,511)
+    lg.setColor(127,127,127,511)
   end
 
-  lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
-  scale=BLOCK_SIZE*height
-  --lg.draw(texture.image, texture.slices[1], x, (lg.getHeight()-height)/2, 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
+  --lg.line(x, lg.getHeight()/2+height/2, x, lg.getHeight()/2-height/2)
+  scale=height/BLOCK_SIZE
+  lg.draw(texture.image, texture.slices[slice], x, (lg.getHeight()-height/2), 0, 1, scale, texture.image:getWidth()/2, texture.image:getHeight()/2)
 end
 
 function traceRay(angle, world, strip)
@@ -243,11 +240,11 @@ function traceRay(angle, world, strip)
 
   if distanceh<distancev then
     hit.distance=distanceh
-    hit.slice=Ax%BLOCK_SIZE
+    hit.slice=math.floor(Ax%BLOCK_SIZE)
     hit._type="horizontal"
   else
     hit.distance=distancev
-    hit.slice=By%BLOCK_SIZE
+    hit.slice=math.floor(By%BLOCK_SIZE)
     hit._verticalHit="vertical"
   end
 
@@ -302,14 +299,14 @@ function drawMiniMap(x, y)
       local py = y+MINI_MAP_TILE_SIZE*(ny-1)+1
 
       if map[ny][nx]==0 then
-        lg.setColor(255,255,255)
+        lg.setColor(225,225,225)
       else
-        lg.setColor(0,0,0)
+        lg.setColor(25,25,25)
       end
 
       lg.rectangle("fill", px, py, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE)
-      lg.setColor(200,200,200)
-      lg.rectangle("line", px, py, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE)
+      --lg.setColor(200,200,200)
+      --lg.rectangle("line", px, py, MINI_MAP_TILE_SIZE, MINI_MAP_TILE_SIZE)
     end
   end
 
